@@ -48,6 +48,17 @@ int main(int argc, char* argv[]) {
   MatrixXd noisyImg = matImg + noise;
   noisyImg = noisyImg.cwiseMax(0.0).cwiseMin(255.0);  
 
+  Eigen::Map<const VectorXd> v(matImg.data(), matImg.size()); // size() == m*n
+  Eigen::Map<const VectorXd> w(noisyImg.data(),    noisyImg.size());
+
+    // 2) Verifica dimensioni
+    assert(v.size() == height * width);
+    assert(w.size() == height * width);
+
+    // 3) Norma euclidea di v
+    double v_norm = v.norm(); 
+    cout<<"norma euclidea di v:"<<v_norm<<endl;
+
   Matrix<unsigned char, Dynamic, Dynamic, RowMajor> img(height, width);
   img = noisyImg.unaryExpr([](double val) -> unsigned char {
     return static_cast<unsigned char>(val);
