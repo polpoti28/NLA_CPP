@@ -1,5 +1,7 @@
 #include <Eigen/Dense>
 #include <iostream>
+#include <Eigen/Sparse>
+#include "utils.h"
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
@@ -37,7 +39,6 @@ int main(int argc, char* argv[]) {
     }
   }
 
-  cout << matImg << endl;
   cout << matImg.size() << endl;
 
   stbi_image_free(image_data);
@@ -72,6 +73,17 @@ int main(int argc, char* argv[]) {
 
     return 1;
     }
+  
+  MatrixXd H_av1(3,3);
+  H_av1 << 1, 1, 0,
+           1, 2, 1,
+           0, 1, 1;
+  H_av1 = H_av1/8;
+
+  SparseMatrix<double> A1 = conv_to_mat(H_av1, width, height);
+
+  cout << height << " " << width << endl;
+  cout << A1.nonZeros() << endl;
 
   return 0;
 }
