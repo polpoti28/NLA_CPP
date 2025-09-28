@@ -34,7 +34,8 @@ int main(int argc, char* argv[]) {
   
   for (int i = 0; i < height; i++) {
     for (int j = 0; j < width; j++) {
-      int index = (i*width + j)*channels;
+     
+      int index = i*width + j;
       matImg(i, j) = static_cast<double>(image_data[index]);
     }
   }
@@ -73,17 +74,41 @@ int main(int argc, char* argv[]) {
 
     return 1;
     }
-  
-  MatrixXd H_av1(3,3);
-  H_av1 << 1, 1, 0,
-           1, 2, 1,
-           0, 1, 1;
-  H_av1 = H_av1/8;
+    MatrixXd H_av1(3,3);
+    H_av1 << 1, 1, 0,
+              1, 2, 1,
+              0, 1, 1;
+    H_av1 = H_av1 / 8.0;
+    
+    // costruisci matrice A1 in column-major
+    SparseMatrix<double> A1 = conv_to_mat(H_av1, height, width);
+    
+    cout << height << " " << width << endl;
+    cout << A1.nonZeros() << endl;
+    
+    // applica filtro
+    VectorXd blurv = A1 * w;
+    
+    // mappa di nuovo in matrice column-major
+    Eigen::Map<const MatrixXd> blurImg(blurv.data(), height, width);
+    
+    // clamp e cast a unsigned char
+    // blurImg è MatrixXd (column-major). Per il PNG serve row-major:
+Matrix<unsigned char, Dynamic, Dynamic, RowMajor> imgBlur(height, width);
+imgBlur = blurImg.unaryExpr([](double v)->unsigned char {
+    v = std::min(std::max(v, 0.0), 255.0);
+    return static_cast<unsigned char>(std::lround(v));
+});
 
-  SparseMatrix<double> A1 = conv_to_mat(H_av1, width, height);
+const string output_image_path2 = "vediamo.png";
+stbi_write_png("vediamo.png", width, height, 1, imgBlur.data(), width);
 
-  cout << height << " " << width << endl;
-  cout << A1.nonZeros() << endl;
-
-  return 0;
+    if (stbi_write_png(output_image_path2.c_str(), width, height, 1,
+                       imgBlur.data(), width) == 0) {
+        cerr << "Error: Could not save blurred image" << endl;
+        return 1;
+    }
+    
+    return 0;
+    
 }
