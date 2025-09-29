@@ -58,29 +58,13 @@ int main(int argc, char* argv[]) {
   assert(v.size() == height * width);
   assert(w.size() == height * width);
 
-  // 3) Norma euclidea di v
+  // Calculate the euclidean norm
   double v_norm = v.norm(); 
-  cout<<"norma euclidea di v:"<<v_norm<<endl;
+  cout<<"Euclidean norm of v:"<<v_norm<<endl;
 
 
   saveImg("noisyImg.png", noisyImg, "noisy", height, width);
 
-  /*
-  Matrix<unsigned char, Dynamic, Dynamic, RowMajor> img(height, width);
-  img = noisyImg.unaryExpr([](double val) -> unsigned char {
-    return static_cast<unsigned char>(val);
-  });
-
-  // Save the image using stb_image_write
-  const string output_image_path1 = "noisyImg.png";
-  if (stbi_write_png(output_image_path1.c_str(), width, height, 1,
-                     img.data(), width) == 0) {
-    cerr << "Error: Could not save noisy image" << endl;
-
-    return 1;
-  }
-  */
-  
   MatrixXd H_av1(3,3);
   H_av1 << 1, 1, 0,
             1, 2, 1,
@@ -98,8 +82,23 @@ int main(int argc, char* argv[]) {
   * for the image */
   VectorXd blurv = A1 * w;
   Eigen::Map<const MatrixXd> blurImg(blurv.data(), height, width);
-  
   saveImg("blurImg.png", blurImg, "blurred", height, width);
   
+  MatrixXd H_sh1(3,3);
+  H_sh1 << 0, -2, 0,
+           -2, 9, -2,
+           0, -2, 0;
+  
+  SparseMatrix<double> A2 = conv_to_mat(H_sh1, height, width);
+  cout << height << " " << width << endl;
+  cout << A2.nonZeros() << endl;
+
+  SparseMatrix<double> A2_sp = SparseMatrix<double>(A2.transpose()) - A2;
+  cout << "Norm of skew-symmetric part: " << A2_sp.norm() << endl;
+
+  VectorXd sharpv = A2 * v;
+  Map<const MatrixXd> sharpImg(sharpv.data(), height, width);
+  saveImg("sharpImg.png", sharpImg, "sharpened", height, width);
+
   return 0;
 }
