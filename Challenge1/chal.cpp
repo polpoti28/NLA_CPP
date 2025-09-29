@@ -62,7 +62,6 @@ int main(int argc, char* argv[]) {
   double v_norm = v.norm(); 
   cout<<"Euclidean norm of v:"<<v_norm<<endl;
 
-
   saveImg("noisyImg.png", noisyImg, "noisy", height, width);
 
   MatrixXd H_av1(3,3);
@@ -81,6 +80,7 @@ int main(int argc, char* argv[]) {
   * We apply the filter and reconstruct the matrix 
   * for the image */
   VectorXd blurv = A1 * w;
+  blurv = blurv.cwiseMax(0.0).cwiseMin(255.0);
   Eigen::Map<const MatrixXd> blurImg(blurv.data(), height, width);
   saveImg("blurImg.png", blurImg, "blurred", height, width);
   
@@ -97,6 +97,7 @@ int main(int argc, char* argv[]) {
   cout << "Norm of skew-symmetric part: " << A2_sp.norm() << endl;
 
   VectorXd sharpv = A2 * v;
+  sharpv = sharpv.cwiseMax(0.0).cwiseMin(255.0);
   Map<const MatrixXd> sharpImg(sharpv.data(), height, width);
   saveImg("sharpImg.png", sharpImg, "sharpened", height, width);
 
