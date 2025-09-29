@@ -1,6 +1,7 @@
 #include <Eigen/Dense>
 #include <iostream>
 #include <Eigen/Sparse>
+#include <string>
 #include "utils.h"
 
 #define STB_IMAGE_IMPLEMENTATION
@@ -53,14 +54,18 @@ int main(int argc, char* argv[]) {
   Eigen::Map<const VectorXd> v(matImg.data(), matImg.size()); // size() == m*n
   Eigen::Map<const VectorXd> w(noisyImg.data(),    noisyImg.size());
 
-    // 2) Verifica dimensioni
-    assert(v.size() == height * width);
-    assert(w.size() == height * width);
+  // 2) Verifica dimensioni
+  assert(v.size() == height * width);
+  assert(w.size() == height * width);
 
-    // 3) Norma euclidea di v
-    double v_norm = v.norm(); 
-    cout<<"norma euclidea di v:"<<v_norm<<endl;
+  // 3) Norma euclidea di v
+  double v_norm = v.norm(); 
+  cout<<"norma euclidea di v:"<<v_norm<<endl;
 
+
+  saveImg("noisyImg.png", noisyImg, "noisy", height, width);
+
+  /*
   Matrix<unsigned char, Dynamic, Dynamic, RowMajor> img(height, width);
   img = noisyImg.unaryExpr([](double val) -> unsigned char {
     return static_cast<unsigned char>(val);
@@ -73,42 +78,28 @@ int main(int argc, char* argv[]) {
     cerr << "Error: Could not save noisy image" << endl;
 
     return 1;
-    }
-    MatrixXd H_av1(3,3);
-    H_av1 << 1, 1, 0,
-              1, 2, 1,
-              0, 1, 1;
-    H_av1 = H_av1 / 8.0;
-    
-    // costruisci matrice A1 in column-major
-    SparseMatrix<double> A1 = conv_to_mat(H_av1, height, width);
-    
-    cout << height << " " << width << endl;
-    cout << A1.nonZeros() << endl;
-    
-    // applica filtro
-    VectorXd blurv = A1 * w;
-    
-    // mappa di nuovo in matrice column-major
-    Eigen::Map<const MatrixXd> blurImg(blurv.data(), height, width);
-    
-    // clamp e cast a unsigned char
-    // blurImg è MatrixXd (column-major). Per il PNG serve row-major:
-Matrix<unsigned char, Dynamic, Dynamic, RowMajor> imgBlur(height, width);
-imgBlur = blurImg.unaryExpr([](double v)->unsigned char {
-    v = std::min(std::max(v, 0.0), 255.0);
-    return static_cast<unsigned char>(std::lround(v));
-});
-
-const string output_image_path2 = "vediamo.png";
-stbi_write_png("vediamo.png", width, height, 1, imgBlur.data(), width);
-
-    if (stbi_write_png(output_image_path2.c_str(), width, height, 1,
-                       imgBlur.data(), width) == 0) {
-        cerr << "Error: Could not save blurred image" << endl;
-        return 1;
-    }
-    
-    return 0;
-    
+  }
+  */
+  
+  MatrixXd H_av1(3,3);
+  H_av1 << 1, 1, 0,
+            1, 2, 1,
+            0, 1, 1;
+  H_av1 = H_av1 / 8.0;
+  
+  // Constructing A1
+  SparseMatrix<double> A1 = conv_to_mat(H_av1, height, width);
+  
+  cout << height << " " << width << endl;
+  cout << A1.nonZeros() << endl;
+  
+  /*
+  * We apply the filter and reconstruct the matrix 
+  * for the image */
+  VectorXd blurv = A1 * w;
+  Eigen::Map<const MatrixXd> blurImg(blurv.data(), height, width);
+  
+  saveImg("blurImg.png", blurImg, "blurred", height, width);
+  
+  return 0;
 }
