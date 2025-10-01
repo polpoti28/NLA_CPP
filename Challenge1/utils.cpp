@@ -1,6 +1,11 @@
 #include <Eigen/Sparse>
+#include <Eigen/Dense>
 #include <iostream>
 #include <string>
+#include <fstream>
+#include <sstream>
+#include <algorithm>
+#include <cctype>
 #include "stb_image.h"
 #include "stb_image_write.h"
 
@@ -67,4 +72,21 @@ int saveImg(const string output_string, MatrixXd img_d,
     return 1;
   }
   return 0;
+}
+
+/*
+* saveMarketVector is deprecated, we implement
+* a custom function that saves a vector with
+* vector coordinate real general format
+*/
+
+void saveMarketVectorCRL(const char* filename, const VectorXd v) {
+    const long n = v.size();
+    FILE* fp = fopen(filename, "w");
+    fprintf(fp, "%%%%MatrixMarket vector coordinate real general\n");
+    fprintf(fp, "%ld 1\n", n);
+    for (int i = 0; i < n; i++) {
+        fprintf(fp, "%d %f\n", i+1, v(i));
+    }
+    fclose(fp);
 }

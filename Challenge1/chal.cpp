@@ -1,6 +1,7 @@
 #include <Eigen/Dense>
 #include <iostream>
 #include <Eigen/Sparse>
+#include <unsupported/Eigen/SparseExtra>
 #include <string>
 #include "utils.h"
 
@@ -32,7 +33,6 @@ int main(int argc, char* argv[]) {
   
   MatrixXd matImg(height, width);
   // Filling the matrix with image data
-  
   for (int i = 0; i < height; i++) {
     for (int j = 0; j < width; j++) {
      
@@ -52,7 +52,7 @@ int main(int argc, char* argv[]) {
   noisyImg = noisyImg.cwiseMax(0.0).cwiseMin(255.0);  
 
   Eigen::Map<const VectorXd> v(matImg.data(), matImg.size()); // size() == m*n
-  Eigen::Map<const VectorXd> w(noisyImg.data(),    noisyImg.size());
+  Eigen::Map<const VectorXd> w(noisyImg.data(), noisyImg.size());
 
   // 2) Verifica dimensioni
   assert(v.size() == height * width);
@@ -94,12 +94,45 @@ int main(int argc, char* argv[]) {
   cout << A2.nonZeros() << endl;
 
   SparseMatrix<double> A2_sp = SparseMatrix<double>(A2.transpose()) - A2;
-  cout << "Norm of skew-symmetric part: " << A2_sp.norm() << endl;
+  cout << "Norm of skew-symmetric part of A2: " << A2_sp.norm() << endl;
 
   VectorXd sharpv = A2 * v;
   sharpv = sharpv.cwiseMax(0.0).cwiseMin(255.0);
   Map<const MatrixXd> sharpImg(sharpv.data(), height, width);
   saveImg("sharpImg.png", sharpImg, "sharpened", height, width);
+
+
+  ifstream file("sol.mtx");
+  if (!file) {
+    // Exporting A2 and v in Matrix Market format
+    saveMarket(A2, "A2.mtx");
+    saveMarketVectorCRL("w.mtx", w);
+  }
+
+  VectorXd x;
+  if (!loadMarketVector_fixed(x, "sol.mtx")) {
+    std::cerr << "Failed to load sol.mtx" << std::endl;
+    return 1;
+  }
+  x = x.cwiseMax(0.0).cwiseMin(255.0);
+  cout << x.size() << endl;
+  
+  Map<const MatrixXd> xImg(x.data(), height, width);
+  saveImg("x.png", xImg, "sol1", height, width);
+
+  MatrixXd H_ed2(3,3);
+  H_ed2 << -1, -2, -1,
+            0, 0, 0,
+            1, 2, 1;
+
+  SparseMatrix<double> A3 = conv_to_mat(H_ed2, height, width);
+  SparseMatrix<double> A3_sp = SparseMatrix<double>(A3.transpose()) - A3;
+  cout << "Norm of skew-symmetric part of A3: " << A3_sp.norm() << endl;
+
+  VectorXd vEdge = A3 * v;
+  vEdge = vEdge.cwiseMax(0.0).cwiseMin(255.0);
+  Map<const MatrixXd> vEdgeImg(vEdge.data(), height, width);
+  saveImg("edgeImg.png", vEdgeImg, "edge", height, width);
 
   return 0;
 }
