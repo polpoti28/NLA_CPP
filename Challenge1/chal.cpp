@@ -134,5 +134,50 @@ int main(int argc, char* argv[]) {
   Map<const MatrixXd> vEdgeImg(vEdge.data(), height, width);
   saveImg("edgeImg.png", vEdgeImg, "edge", height, width);
 
+  const int nm = height * width;
+  //DiagonalMatrix<double,nm>::Identity	mat1(nm, nm);
+
+  SparseMatrix<double> I(nm, nm);
+  SparseMatrix<double> A3_I(nm, nm);
+  I.setIdentity();
+  I  = 3 * I;
+
+  A3_I  = A3 + I;
+
+  cout << I.size() << endl;
+  DiagonalPreconditioner<double> D(A3_I);
+  BiCGSTAB<SparseMatrix<double> > solver;
+ // solver.setMaxIterations(1000);
+  solver.setTolerance(1e-8);
+  solver.compute(A3_I);
+  VectorXd y; 
+  y = solver.solve(w);
+  std::cout << "#iterations:     " << solver.iterations() << std::endl;
+  std::cout << "estimated error: " << solver.error() << std::endl; 
+
+
+
+  y = y.cwiseMax(0.0).cwiseMin(255.0);
+  Map<const MatrixXd> yImg(y.data(), height, width);
+  saveImg("y.png", yImg, "y", height, width);
+
+
+int ret = system("./lis_bash_script.sh A3.mtx 1 sol_tmp.mtx OUTPUT_FILE.mtx HISTORY.txt");
+
+if (ret != 0) {
+    std::cerr << "Failed to run the bash script!" << std::endl;
+}
+  
+
+
+
   return 0;
+
+
+
+
+
+
+
+
 }
