@@ -5,13 +5,13 @@
 
 set -e
 
-SRC="/home/shared-folder/lis-2.1.10/lis-2.1.10/test/test1.c"
-OUT ="test1"
+SRC="/home/$USER/shared-folder/lis-2.1.10/lis-2.1.10/test/test1.c"
+OUT="test1"
 
-echo "Loading environment and Lis module..."
-source /u/sw/etc/bash.bashrc
-module load gcc-glibc
-module load lis
+ echo "Loading environment and Lis module..."
+ source /u/sw/etc/bash.bashrc
+ module load gcc-glibc
+ module load lis
 
 # Check for required environment variables
 if [ -z "$mkLisInc" ] || [ -z "$mkLisLib" ]; then
@@ -41,11 +41,14 @@ fi
 MATRIX="$1"
 RHS_OPTION="$2"
 OUTPUT_FILE="$3"
-HISTORY_FILE="${4:-HISTORY.txt}"  # Default history file
+HISTORY_FILE="$4"
+I="$5"  # Default history file
+PRECOND="$6"
+TOL="$7"
 
 # Run the program with 4 MPI processes
 echo "Running test1 with 4 MPI processes..."
-mpirun -n 4 ./test1 "$MATRIX" "$RHS_OPTION" "$OUTPUT_FILE" "$HISTORY_FILE"
+mpirun -n 4 ./test1 "$MATRIX" "$RHS_OPTION" "$OUTPUT_FILE" "$HISTORY_FILE" -i "$I" -p "$PRECOND" -tol "$TOL"
 
 
 

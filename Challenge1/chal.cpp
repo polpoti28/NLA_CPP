@@ -109,6 +109,12 @@ int main(int argc, char* argv[]) {
     saveMarketVectorCRL("w.mtx", w);
   }
 
+  int ret = system("./lis_bash_script.sh A2.mtx 1 sol.mtx history.txt cg 8 1e-8");
+
+  if (ret != 0) {
+    std::cerr << "Failed to run the bash script!" << std::endl;
+  }
+
   VectorXd x;
   if (!loadMarketVector_fixed(x, "sol.mtx")) {
     std::cerr << "Failed to load sol.mtx" << std::endl;
@@ -135,7 +141,6 @@ int main(int argc, char* argv[]) {
   saveImg("edgeImg.png", vEdgeImg, "edge", height, width);
 
   const int nm = height * width;
-  //DiagonalMatrix<double,nm>::Identity	mat1(nm, nm);
 
   SparseMatrix<double> I(nm, nm);
   SparseMatrix<double> A3_I(nm, nm);
@@ -162,11 +167,7 @@ int main(int argc, char* argv[]) {
   saveImg("y.png", yImg, "y", height, width);
 
 
-int ret = system("./lis_bash_script.sh A3.mtx 1 sol_tmp.mtx OUTPUT_FILE.mtx HISTORY.txt");
 
-if (ret != 0) {
-    std::cerr << "Failed to run the bash script!" << std::endl;
-}
   
 
 
