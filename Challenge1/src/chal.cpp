@@ -10,8 +10,12 @@
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "stb_image_write.h"
 
-using namespace Eigen;
-using namespace std;
+using Eigen::MatrixXd;
+using Eigen::SparseMatrix;
+using Eigen::VectorXd;
+using std::cout;
+using std::cerr;
+using std::endl;
 
 int main(int argc, char* argv[]) {
   if (argc < 2 ) {
@@ -21,7 +25,7 @@ int main(int argc, char* argv[]) {
 
   const char* input_image_path = argv[1];
 
-  // Load the image using stb_image
+  // Loading the image using stb_image
   int width, height, channels;
   unsigned char* image_data = stbi_load(input_image_path, &width, &height, &channels, 1);
   if (!image_data) {
@@ -51,7 +55,7 @@ int main(int argc, char* argv[]) {
   MatrixXd noisyImg = matImg + noise;
   noisyImg = noisyImg.cwiseMax(0.0).cwiseMin(255.0);  
 
-  Eigen::Map<const VectorXd> v(matImg.data(), matImg.size()); // size() == m*n
+  Eigen::Map<const VectorXd> v(matImg.data(), matImg.size()); 
   Eigen::Map<const VectorXd> w(noisyImg.data(), noisyImg.size());
 
   // 2) Verifica dimensioni
@@ -98,11 +102,11 @@ int main(int argc, char* argv[]) {
 
   VectorXd sharpv = A2 * v;
   sharpv = sharpv.cwiseMax(0.0).cwiseMin(255.0);
-  Map<const MatrixXd> sharpImg(sharpv.data(), height, width);
+  Eigen::Map<const MatrixXd> sharpImg(sharpv.data(), height, width);
   saveImg("../images/sharpImg.png", sharpImg, "sharpened", height, width);
 
 
-  ifstream file("sol.mtx");
+  std::ifstream file("sol.mtx");
   if (!file) {
     // Exporting A2 and v in Matrix Market format
     saveMarket(A2, "../data/A2.mtx");
@@ -123,7 +127,7 @@ int main(int argc, char* argv[]) {
   x = x.cwiseMax(0.0).cwiseMin(255.0);
   cout << x.size() << endl;
   
-  Map<const MatrixXd> xImg(x.data(), height, width);
+  Eigen::Map<const MatrixXd> xImg(x.data(), height, width);
   saveImg("../images/x.png", xImg, "sol1", height, width);
 
   MatrixXd H_ed2(3,3);
@@ -137,7 +141,7 @@ int main(int argc, char* argv[]) {
 
   VectorXd vEdge = A3 * v;
   vEdge = vEdge.cwiseMax(0.0).cwiseMin(255.0);
-  Map<const MatrixXd> vEdgeImg(vEdge.data(), height, width);
+  Eigen::Map<const MatrixXd> vEdgeImg(vEdge.data(), height, width);
   saveImg("../images/edgeImg.png", vEdgeImg, "edge", height, width);
 
   const int nm = height * width;
@@ -146,11 +150,10 @@ int main(int argc, char* argv[]) {
   SparseMatrix<double> A3_I(nm, nm);
   I.setIdentity();
   I  = 3 * I;
-
   A3_I  = A3 + I;
 
   cout << I.size() << endl;
-  BiCGSTAB<SparseMatrix<double>, IncompleteLUT<double>> solver;
+  Eigen::BiCGSTAB<SparseMatrix<double>, Eigen::IncompleteLUT<double>> solver;
   solver.setTolerance(1e-8);
   solver.compute(A3_I);
   VectorXd y; 
@@ -159,7 +162,7 @@ int main(int argc, char* argv[]) {
   std::cout << "estimated error: " << solver.error() << std::endl; 
 
   y = y.cwiseMax(0.0).cwiseMin(255.0);
-  Map<const MatrixXd> yImg(y.data(), height, width);
+  Eigen::Map<const MatrixXd> yImg(y.data(), height, width);
   saveImg("../images/y.png", yImg, "y", height, width);
 
   return 0;

@@ -1,31 +1,29 @@
 #include <Eigen/Dense>
 #include <string>
 
-using namespace Eigen;
-using namespace std;
-
-
-SparseMatrix<double> conv_to_mat(const MatrixXd& H, int n, int m);
-int saveImg(const string output_string, MatrixXd img_d, const string type, int height, int width);
-void saveMarketVectorCRL(const char* filename, const VectorXd v);
+Eigen::SparseMatrix<double> conv_to_mat(const Eigen::MatrixXd& H, int n, int m);
+int saveImg(const std::string output_string, Eigen::MatrixXd img_d, const std::string type, int height, int width);
+void saveMarketVectorCRL(const char* filename, const Eigen::VectorXd v);
 
 /*
 * Modified GetVectorElt to be able to read
 * LIS format with indices
 */
-
-  inline void GetVectorElt_fixed (const std::string& line, double& val) {
-    double valR;
-    int index;
-    std::istringstream newline(line);
-    newline >> index >> valR; 
-    val = valR;
-  }
+inline void GetVectorElt_fixed (const std::string& line, double& val) {
+  double valR;
+  int index;
+  std::istringstream newline(line);
+  newline >> index >> valR; 
+  val = valR;
+}
 
 
 /*
 * loadMarketVector function fixes:
-* 
+* the function now uses GetVectorElt_fixed to 
+* put in vec the values in the .mtx file.
+* It basically skips the indices to just read
+* the values
 */
 template<typename VectorType>
 bool loadMarketVector_fixed(VectorType& vec, const std::string& filename) {
@@ -35,7 +33,7 @@ bool loadMarketVector_fixed(VectorType& vec, const std::string& filename) {
     return false;
   
   std::string line; 
-  int n(0), col(1); 
+  int n(0);
   do 
   { // Skip comments
     std::getline(in, line); eigen_assert(in.good());
