@@ -25,6 +25,10 @@ int main(int argc, char* argv[]) {
 
   const char* input_image_path = argv[1];
 
+  // ---------
+  // TASK 1
+  // ---------
+
   // Loading the image using stb_image
   int width, height, channels;
   unsigned char* image_data = stbi_load(input_image_path, &width, &height, &channels, 1);
@@ -49,16 +53,25 @@ int main(int argc, char* argv[]) {
 
   stbi_image_free(image_data);
   
+  // ---------
+  // TASK 2
+  // ---------
+
   // We apply random noise by using Eigen MatrixXd::Random
   // It generates a matrix with random values between [-1,1]
   MatrixXd noise = MatrixXd::Random(height, width) * 40;
   MatrixXd noisyImg = matImg + noise;
   noisyImg = noisyImg.cwiseMax(0.0).cwiseMin(255.0);  
+  saveImg("../images/noisyImg.png", noisyImg, "noisy", height, width);
 
+  // ---------
+  // TASK 3
+  // ---------
+  
   Eigen::Map<const VectorXd> v(matImg.data(), matImg.size()); 
   Eigen::Map<const VectorXd> w(noisyImg.data(), noisyImg.size());
 
-  // 2) Verifica dimensioni
+  // Verify the dimensions
   assert(v.size() == height * width);
   assert(w.size() == height * width);
 
@@ -66,7 +79,9 @@ int main(int argc, char* argv[]) {
   double v_norm = v.norm(); 
   cout<<"Euclidean norm of v:"<<v_norm<<endl;
 
-  saveImg("../images/noisyImg.png", noisyImg, "noisy", height, width);
+  // ---------
+  // TASK 4
+  // ---------
 
   MatrixXd H_av1(3,3);
   H_av1 << 1, 1, 0,
@@ -80,6 +95,10 @@ int main(int argc, char* argv[]) {
   cout << height << " " << width << endl;
   cout << A1.nonZeros() << endl;
   
+  // ---------
+  // TASK 5
+  // ---------
+
   /*
   * We apply the filter and reconstruct the matrix 
   * for the image */
@@ -88,6 +107,10 @@ int main(int argc, char* argv[]) {
   Eigen::Map<const MatrixXd> blurImg(blurv.data(), height, width);
   saveImg("../images/blurImg.png", blurImg, "blurred", height, width);
   
+  // ---------
+  // TASK 6
+  // ---------
+
   MatrixXd H_sh1(3,3);
   H_sh1 << 0, -2, 0,
            -2, 9, -2,
@@ -100,11 +123,18 @@ int main(int argc, char* argv[]) {
   SparseMatrix<double> A2_sp = SparseMatrix<double>(A2.transpose()) - A2;
   cout << "Norm of skew-symmetric part of A2: " << A2_sp.norm() << endl;
 
+  // ---------
+  // TASK 7
+  // ---------
+  
   VectorXd sharpv = A2 * v;
   sharpv = sharpv.cwiseMax(0.0).cwiseMin(255.0);
   Eigen::Map<const MatrixXd> sharpImg(sharpv.data(), height, width);
   saveImg("../images/sharpImg.png", sharpImg, "sharpened", height, width);
 
+  // ---------
+  // TASK 8
+  // ---------
 
   std::ifstream file("sol.mtx");
   if (!file) {
@@ -125,10 +155,17 @@ int main(int argc, char* argv[]) {
     return 1;
   }
   x = x.cwiseMax(0.0).cwiseMin(255.0);
-  cout << x.size() << endl;
   
+  // ---------
+  // TASK 9
+  // ---------
+
   Eigen::Map<const MatrixXd> xImg(x.data(), height, width);
   saveImg("../images/x.png", xImg, "sol1", height, width);
+
+  // ---------
+  // TASK 10
+  // ---------
 
   MatrixXd H_ed2(3,3);
   H_ed2 << -1, -2, -1,
@@ -139,10 +176,18 @@ int main(int argc, char* argv[]) {
   SparseMatrix<double> A3_sp = SparseMatrix<double>(A3.transpose()) - A3;
   cout << "Norm of skew-symmetric part of A3: " << A3_sp.norm() << endl;
 
+  // ---------
+  // TASK 11
+  // ---------
+
   VectorXd vEdge = A3 * v;
   vEdge = vEdge.cwiseMax(0.0).cwiseMin(255.0);
   Eigen::Map<const MatrixXd> vEdgeImg(vEdge.data(), height, width);
   saveImg("../images/edgeImg.png", vEdgeImg, "edge", height, width);
+
+  // ---------
+  // TASK 12
+  // ---------
 
   const int nm = height * width;
 
@@ -160,6 +205,10 @@ int main(int argc, char* argv[]) {
   y = solver.solve(w);
   std::cout << "#iterations:     " << solver.iterations() << std::endl;
   std::cout << "estimated error: " << solver.error() << std::endl; 
+
+  // ---------
+  // TASK 13
+  // ---------
 
   y = y.cwiseMax(0.0).cwiseMin(255.0);
   Eigen::Map<const MatrixXd> yImg(y.data(), height, width);
