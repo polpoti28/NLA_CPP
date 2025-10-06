@@ -29,6 +29,8 @@ int main(int argc, char* argv[]) {
   // TASK 1
   // ---------
 
+  std::srand(1234);
+
   // Loading the image using stb_image
   int width, height, channels;
   unsigned char* image_data = stbi_load(input_image_path, &width, &height, &channels, 1);
@@ -42,14 +44,13 @@ int main(int argc, char* argv[]) {
   MatrixXd matImg(height, width);
   // Filling the matrix with image data
   for (int i = 0; i < height; i++) {
-    for (int j = 0; j < width; j++) {
-     
+    for (int j = 0; j < width; j++) { 
       int index = i*width + j;
       matImg(i, j) = static_cast<double>(image_data[index]);
     }
   }
 
-  cout << matImg.size() << endl;
+  cout << "Size of the matrix: " << matImg.size() << endl;
 
   stbi_image_free(image_data);
   
@@ -77,7 +78,7 @@ int main(int argc, char* argv[]) {
 
   // Calculate the euclidean norm
   double v_norm = v.norm(); 
-  cout<<"Euclidean norm of v:"<<v_norm<<endl;
+  cout << "Euclidean norm of v: " << v_norm << endl;
 
   // ---------
   // TASK 4
@@ -92,8 +93,8 @@ int main(int argc, char* argv[]) {
   // Constructing A1
   SparseMatrix<double> A1 = conv_to_mat(H_av1, height, width);
   
-  cout << height << " " << width << endl;
-  cout << A1.nonZeros() << endl;
+  
+  cout << "Number of nonzero entries of A1: " << A1.nonZeros() << endl;
   
   // ---------
   // TASK 5
@@ -117,11 +118,14 @@ int main(int argc, char* argv[]) {
            0, -2, 0;
   
   SparseMatrix<double> A2 = conv_to_mat(H_sh1, height, width);
-  cout << height << " " << width << endl;
-  cout << A2.nonZeros() << endl;
-
   SparseMatrix<double> A2_sp = SparseMatrix<double>(A2.transpose()) - A2;
-  cout << "Norm of skew-symmetric part of A2: " << A2_sp.norm() << endl;
+  cout << "Norm of skew-symmetric part of A2: " << A2_sp.norm();
+  if (A2_sp.norm() < 1e-16) {
+    cout << " --> A2 is symmetric" << endl;
+  } else {
+    cout << " --> A2 is not symmetric" << endl;
+  }
+  cout << "Number of nonzero entries of A2: " << A2.nonZeros() << endl;
 
   // ---------
   // TASK 7
@@ -143,11 +147,15 @@ int main(int argc, char* argv[]) {
     saveMarketVectorCRL("../data/w.mtx", w);
   }
 
+  cout << endl << "---------- LIS OUTPUT ----------" << endl;
+  
   int ret = system("../data/run_test.sh");
 
   if (ret != 0) {
     std::cerr << "Failed to run the bash script!" << std::endl;
   }
+
+  cout << "--------------------------------" << endl << endl;
 
   VectorXd x;
   if (!loadMarketVector_fixed(x, "../data/sol.mtx")) {
@@ -174,7 +182,12 @@ int main(int argc, char* argv[]) {
 
   SparseMatrix<double> A3 = conv_to_mat(H_ed2, height, width);
   SparseMatrix<double> A3_sp = SparseMatrix<double>(A3.transpose()) - A3;
-  cout << "Norm of skew-symmetric part of A3: " << A3_sp.norm() << endl;
+  cout << "Norm of skew-symmetric part of A3: " << A3_sp.norm();
+  if (A3_sp.norm() < 1e-16) {
+    cout << " --> A3 is symmetric" << endl;
+  } else {
+    cout << " --> A3 is not symmetric " << endl;
+  }
 
   // ---------
   // TASK 11
@@ -197,7 +210,6 @@ int main(int argc, char* argv[]) {
   I  = 3 * I;
   A3_I  = A3 + I;
 
-  cout << I.size() << endl;
   Eigen::BiCGSTAB<SparseMatrix<double>, Eigen::IncompleteLUT<double>> solver;
   solver.setTolerance(1e-8);
   solver.compute(A3_I);
