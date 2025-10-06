@@ -34,7 +34,7 @@ By writing the convolution operations corresponding to the kernels as a matrixâ€
 We started with the original one and then added noise:
 
 
-<table align="center" style="margin: auto; border-collapse: collapse;">
+<table align="center" style="border: none; margin: auto; border-collapse: collapse;">
   <tr>
     <td align="center">
       <img src="Challenge1/images/uma.jpg" alt="Original Image" width="200px"/><br>
@@ -65,7 +65,7 @@ $$
 
 We obtained the following images
 
-<table align="center" style="margin: auto; border-collapse: collapse;">
+<table align="center" style="border: none; margin: auto; border-collapse: collapse;">
   <tr>
     <td align="center">
       <img src="Challenge1/images/blurImg.png" alt="Blurred image" width="200px"/><br>
