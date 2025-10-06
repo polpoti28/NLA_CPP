@@ -62,6 +62,7 @@ H_{sh1} = \begin{pmatrix}
 0 & -2 & 1
 \end{pmatrix}
 $$
+
 We obtained the following images
 
 <table align="center" style="margin: auto; border-collapse: collapse;">
