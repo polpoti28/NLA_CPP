@@ -4,6 +4,7 @@
 #include <unsupported/Eigen/SparseExtra>
 #include <string>
 #include "utils.h"
+#include <time.h>
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
@@ -29,8 +30,6 @@ int main(int argc, char* argv[]) {
   // TASK 1
   // ---------
 
-  std::srand(1234);
-
   // Loading the image using stb_image
   int width, height, channels;
   unsigned char* image_data = stbi_load(input_image_path, &width, &height, &channels, 1);
@@ -50,7 +49,7 @@ int main(int argc, char* argv[]) {
     }
   }
 
-  cout << "Size of the matrix: " << matImg.size() << endl;
+  cout << "Size of the matrix: " << matImg.rows() << " " << matImg.cols() << endl;
 
   stbi_image_free(image_data);
   
@@ -127,6 +126,16 @@ int main(int argc, char* argv[]) {
   }
   cout << "Number of nonzero entries of A2: " << A2.nonZeros() << endl;
 
+  /* To check if A2 is positive definite we apply
+  * Cholesky decomposition */
+
+  Eigen::SimplicialLLT<Eigen::SparseMatrix<double>> chol(A2);
+  if (chol.info() == Eigen::Success) {
+    cout << "A2 is positive definite" << endl;
+  } else {
+    cout << "A2 is not positive definite" << endl;
+  }
+
   // ---------
   // TASK 7
   // ---------
@@ -182,6 +191,7 @@ int main(int argc, char* argv[]) {
 
   SparseMatrix<double> A3 = conv_to_mat(H_ed2, height, width);
   SparseMatrix<double> A3_sp = SparseMatrix<double>(A3.transpose()) - A3;
+  cout << "Number of non zero entries of A3: " << A3.nonZeros() << endl; 
   cout << "Norm of skew-symmetric part of A3: " << A3_sp.norm();
   if (A3_sp.norm() < 1e-16) {
     cout << " --> A3 is symmetric" << endl;
@@ -210,13 +220,21 @@ int main(int argc, char* argv[]) {
   I  = 3 * I;
   A3_I  = A3 + I;
 
-  Eigen::BiCGSTAB<SparseMatrix<double>, Eigen::IncompleteLUT<double>> solver;
+  clock_t start = clock();
+  Eigen::BiCGSTAB<SparseMatrix<double>> solver;
   solver.setTolerance(1e-8);
   solver.compute(A3_I);
   VectorXd y; 
   y = solver.solve(w);
+  clock_t end = clock();
+
+  cout << "Elapsed time: " << (end - start) / CLOCKS_PER_SEC << "s" << endl;
+
+  double final_res = ((w - A3_I*y).norm()) / (w.norm());
+
   std::cout << "#iterations:     " << solver.iterations() << std::endl;
   std::cout << "estimated error: " << solver.error() << std::endl; 
+  std::cout << "Final residual:  " << final_res << std::endl;
 
   // ---------
   // TASK 13
