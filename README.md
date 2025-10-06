@@ -34,18 +34,20 @@ By writing the convolution operations corresponding to the kernels as a matrixâ€
 We started with the original one and then added noise:
 
 
-<table align="center" style="border: none; margin: auto; border-collapse: collapse;">
-  <tr>
-    <td align="center">
-      <img src="Challenge1/images/uma.jpg" alt="Original Image" width="200px"/><br>
-      <em>Original Image</em>
-    </td>
-    <td align="center">
-      <img src="Challenge1/images/noisyImg.png" alt="Noisy Image" width="200px"/><br>
-      <em>Noisy Image</em>
-    </td>
-  </tr>
-</table>
+<div align="center" style="display: flex; justify-content: center; gap: 30px; flex-wrap: wrap;">
+
+  <div>
+    <img src="Challenge1/images/uma.jpg" alt="Original Image" width="200px"/><br>
+    <em>Original Image</em>
+  </div>
+
+  <div>
+    <img src="Challenge1/images/noisyImg.png" alt="Noisy Image" width="200px"/><br>
+    <em>Noisy Image</em>
+  </div>
+
+</div>
+
 
 We applied a smoothing kernel to the noisy image and a sharpening kernel to the original one:
 
@@ -65,18 +67,19 @@ $$
 
 We obtained the following images
 
-<table align="center" style="border: none; margin: auto; border-collapse: collapse;">
-  <tr>
-    <td align="center">
-      <img src="Challenge1/images/blurImg.png" alt="Blurred image" width="200px"/><br>
-      <em>Blurred Image</em>
-    </td>
-    <td align="center">
-      <img src="Challenge1/images/sharpImg.png" alt="Sharpened image" width="200px"/><br>
-      <em>Sharpened Image</em>
-    </td>
-  </tr>
-</table>
+<div align="center" style="display: flex; justify-content: center; gap: 20px; flex-wrap: wrap;">
+
+  <div>
+    <img src="Challenge1/images/blurImg.png" alt="Blurred Image" width="200px"/><br>
+    <em>Blurred Image</em>
+  </div>
+
+  <div>
+    <img src="Challenge1/images/sharpImg.png" alt="Sharpened Image" width="200px"/><br>
+    <em>Sharpened Image</em>
+  </div>
+
+</div>
 
 Using the LIS library we also solved the linear system $A_2\mathbf{x}=\mathbf{w}$ where $A_2$ is the matrix that corresponds to $H_{sh1}$ and $\mathbf{w}$ is the noisy image represented as a vector. Since $A_2$ is SPD we used the Conjugate Gradient method. We exported $\mathbf{x}$ as .png:
 
