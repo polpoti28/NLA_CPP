@@ -30,6 +30,7 @@ int main() {
 
   cout << "The Frobenius norm of the matrix A_g is: " << A_g.norm() << endl;
 
+  
   // ---------
   // TASK 2
   // ---------
@@ -48,7 +49,6 @@ int main() {
   VectorXd x = VectorXd::Ones(n);
   VectorXd y = L_g * x;
   cout << y.norm() << endl;
-
 
   
   // ---------
@@ -86,5 +86,57 @@ int main() {
   cout << "The related eigenvector is: " << endl << solver.eigenvectors().col(min_index) << endl;
 
 
+  // ---------
+  // TASK 5
+  // ---------
+
+  SparseMatrix<double> A_s;
+  loadMarket(A_s, "social.mtx");
+  cout << "The Frobenius norm of the matrix A_s is: " << A_s.norm() << endl;
+
+
+  // ---------
+  // TASK 6
+  // ---------
+  
+  int n_s = A_s.rows();
+  VectorXd v_s(n_s);
+  for (int i = 0; i < n_s; i++) {
+    int sum = 0;
+    for (int j = 0; j < n_s; j++) {
+      sum += A_s.coeff(i, j);
+    }
+    v_s[i] = sum;
+  }
+
+  MatrixXd D_s = v_s.asDiagonal();
+  MatrixXd L_s = D_s - A_s;
+  cout << "Number of nnz in L_s: " << L_s.nonZeros() << endl;
+  //checking if L_s is symmetric
+  if((L_s - L_s.transpose()).norm() < 1e-10)
+    cout << "L_s is symmetric" << endl;
+  else
+    cout << "L_s is not symmetric" << endl;
+    
+
+  // ---------
+  // TASK 7
+  // ---------
+
+  /* We add a perturbation to the first diagonal entry
+   * of L_s, export it to a .mtx file and use a LIS
+   * solver to compute the largest eigenvalue of L_s */
+
+  L_s(1,1) += 0.2;
+  if((L_s - L_s.transpose()).norm() < 1e-10) {
+    cout << "perturbed L_s is symmetric" << endl;
+  } else {
+    cout << "perturbed L_s is not symmetric" << endl; 
+  }
+  SparseMatrix<double> L_s_sparse;
+  L_s_sparse = L_s.sparseView();
+  saveMarket(L_s, "L_s.mtx");
+  int ret = system("./run_test.sh");
+  int ret2= system("./run_testshift.sh");
 
 }
