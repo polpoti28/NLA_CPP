@@ -1,9 +1,8 @@
 #include <Eigen/Dense>
 #include <string>
 #include <iostream>
-#include <fstream>   // <-- add this
+#include <fstream>
 #include <sstream>
-
 
 /*
 * Modified GetVectorElt to be able to read

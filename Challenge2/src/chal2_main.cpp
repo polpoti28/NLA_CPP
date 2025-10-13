@@ -128,7 +128,6 @@ int main() {
    * of L_s, export it to a .mtx file and use a LIS
    * solver to compute the largest eigenvalue of L_s */
 
-  
   L_s(0, 0) += 0.2;
   if((L_s - L_s.transpose()).norm() < 1e-10) {
     cout << "perturbed L_s is symmetric" << endl;
@@ -139,5 +138,61 @@ int main() {
   L_s_sparse = L_s.sparseView();
   saveMarket(L_s, "L_s.mtx");
   int ret = system("./run_test.sh");
+
+
+  // ---------
+  // TASK 8
+  // ---------
+
   int ret2 = system("./run_testshift.sh");
+
+
+  // ---------
+  // TASK 9
+  // ---------
+
+  int ret3 = system("./run_test_inverse.sh");
+
+
+  // ---------
+  // TASK 9
+  // ---------
+
+  SparseMatrix<double> eigenVecs;
+  loadMarket(eigenVecs, "eigvec_i.mtx");
+  VectorXd eigVec = eigenVecs.col(0);
+  cout << eigVec << endl;
+
+  int n_p(0), n_n(0);
+  std::vector<int> clusterA;
+  std::vector<int> clusterB;
+
+  for (int i = 0; i < n_s; i++) {
+    if (eigVec[i] < 0) {
+      clusterB.emplace_back(i);
+      n_n++;
+    } else {
+      clusterA.emplace_back(i);
+      n_p++;
+    }
+  }
+
+  cout << "Number of positive entries: " << n_p << endl;
+  cout << "Number of negative entries: " << n_n << endl;
+
+
+  // ---------
+  // TASK 10
+  // ---------
+
+  SparseMatrix<int> P(n_s, n_s);
+  for (int i = 0; i < n_p; i++) {
+    P.coeffRef(i, clusterA[i]) = 1;
+  }
+  for (int i = 0; i < n_n; i++) {
+    P.coeffRef(i+n_p, clusterB[i]) = 1;
+  }
+  
+  SparseMatrix<double> A_ord = P * A_s * P.transpose();
+
 }
